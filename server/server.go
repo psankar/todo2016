@@ -90,10 +90,18 @@ func main() {
 			var t Todo
 			err := decoder.Decode(&t)
 			if err != nil {
+				log.Println(err)
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
 			defer r.Body.Close()
+
+			if len(t.Task) < 1 {
+				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+				return
+			}
+
+			t.Completed = false
 
 			lock.Lock()
 			t.ID = todoCounter
