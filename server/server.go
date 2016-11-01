@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -114,9 +115,19 @@ func main() {
 		}
 	})))
 
-	http.Handle("/todo", authCheck(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	http.Handle("/todo/", authCheck(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		s := strings.TrimPrefix(r.URL.String(), "/todo/")
+		id, err := strconv.ParseUint(s, 10, 64)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		log.Println(id)
+
 		if r.Method == http.MethodPut {
 			// Update the particular Todo item
+
 		} else if r.Method == http.MethodDelete {
 			// Delete the particular Todo item
 		} else {
