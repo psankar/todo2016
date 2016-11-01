@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -64,6 +65,18 @@ func main() {
 	http.Handle("/todos", authCheck(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			// Return all the Todo items
+			lock.RLock()
+			defer lock.RUnlock()
+
+			j, err := json.Marshal(todos)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(j)
+
 		} else if r.Method == http.MethodPost {
 			// Create a new Todo item
 		} else {
