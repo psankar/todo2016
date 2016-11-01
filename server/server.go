@@ -19,7 +19,14 @@ type Todo struct {
 	Completed bool
 }
 
+// In-memory collection of Todos
 var todos []Todo
+
+// If we store the Todos in a database, this will be the LastInsertID
+var todoCounter uint64
+
+// The single lock is used to synchronize access to
+// the above array as well as the counter variables.
 var lock sync.RWMutex
 
 var hmacSampleSecret = []byte("Top secret signing key")
@@ -79,6 +86,21 @@ func main() {
 
 		} else if r.Method == http.MethodPost {
 			// Create a new Todo item
+			decoder := json.NewDecoder(r.Body)
+			var t Todo
+			err := decoder.Decode(&t)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+				return
+			}
+			defer r.Body.Close()
+
+			lock.Lock()
+			t.ID = todoCounter
+			todoCounter++
+			todos = append(todos, t)
+			lock.Unlock()
+			w.WriteHeader(http.StatusCreated)
 		} else {
 			http.NotFound(w, r)
 		}
