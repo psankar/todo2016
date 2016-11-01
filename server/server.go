@@ -161,6 +161,20 @@ func main() {
 
 		} else if r.Method == http.MethodDelete {
 			// Delete the particular Todo item
+			// Update the particular Todo item
+			lock.Lock()
+			defer lock.Unlock()
+
+			for k, v := range todos {
+				if v.ID == id {
+					todos = append(todos[:k], todos[k+1:]...)
+					w.WriteHeader(http.StatusOK)
+					return
+				}
+			}
+
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
 		} else {
 			http.NotFound(w, r)
 		}
