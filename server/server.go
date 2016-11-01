@@ -147,19 +147,17 @@ func main() {
 			lock.Lock()
 			defer lock.Unlock()
 
-			found := false
 			for _, i := range todos {
 				if i.ID == id {
-					found = true
 					i.Task = t.Task
 					i.Completed = t.Completed
+					w.WriteHeader(http.StatusOK)
+					return
 				}
 			}
-			if !found {
-				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-				return
-			}
-			w.WriteHeader(http.StatusOK)
+
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
 
 		} else if r.Method == http.MethodDelete {
 			// Delete the particular Todo item
