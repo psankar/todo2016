@@ -21,7 +21,7 @@ type Todo struct {
 }
 
 // In-memory collection of Todos
-var todos []Todo
+var todos []*Todo
 
 // If we store the Todos in a database, this will be the LastInsertID
 var todoCounter uint64
@@ -107,7 +107,7 @@ func main() {
 			lock.Lock()
 			t.ID = todoCounter
 			todoCounter++
-			todos = append(todos, t)
+			todos = append(todos, &t)
 			lock.Unlock()
 			w.WriteHeader(http.StatusCreated)
 		} else {
@@ -123,10 +123,43 @@ func main() {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		log.Println(id)
 
 		if r.Method == http.MethodPut {
+
+			// Parse task from the request body
+			// Copied from the /todos POST handler
+			decoder := json.NewDecoder(r.Body)
+			var t Todo
+			err := decoder.Decode(&t)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+				return
+			}
+			defer r.Body.Close()
+
+			if len(t.Task) < 1 {
+				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+				return
+			}
+
 			// Update the particular Todo item
+			lock.Lock()
+			defer lock.Unlock()
+
+			found := false
+			for _, i := range todos {
+				if i.ID == id {
+					found = true
+					i.Task = t.Task
+					i.Completed = t.Completed
+				}
+			}
+			if !found {
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
 
 		} else if r.Method == http.MethodDelete {
 			// Delete the particular Todo item
