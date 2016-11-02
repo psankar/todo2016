@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -55,9 +56,7 @@ func authCheck(next http.Handler) http.Handler {
 			return
 		}
 
-		if claims, ok := token.Claims.(jwt.StandardClaims); ok && token.Valid {
-			log.Println(claims)
-		} else {
+		if !token.Valid {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
@@ -68,6 +67,27 @@ func authCheck(next http.Handler) http.Handler {
 func main() {
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		// Authenticate and return JWT
+		if u, p, ok := r.BasicAuth(); ok {
+			if u == p {
+				token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+					ExpiresAt: time.Now().Add(time.Minute * 3).Unix(),
+					Issuer:    "example.com",
+				})
+
+				// Sign and get the complete encoded token as a string using the secret
+				tokenString, err := token.SignedString(hmacSampleSecret)
+				if err != nil {
+					log.Println(err)
+					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+					return
+				}
+
+				fmt.Fprintln(w, tokenString)
+				return
+			}
+		}
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
 	})
 
 	http.Handle("/todos", authCheck(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
