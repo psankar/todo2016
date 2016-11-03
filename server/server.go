@@ -144,6 +144,9 @@ func main() {
 			return
 		}
 
+		// Update the todo with this new todo struct in the request.
+		// NOTE: In an actual production system, the APIs can be designed
+		// better, to incrementally update individual fields
 		if r.Method == http.MethodPut {
 
 			// Parse task from the request body
