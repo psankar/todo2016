@@ -3,7 +3,7 @@ import {createStore, applyMiddleware} from 'redux';
 import {Provider} from 'react-redux';
 import {Router, Route, browserHistory} from 'react-router';
 
-import Login from './components/login';
+import AuthUI from './components/auth_ui';
 import LandingPage from './components/pages/landing_page';
 import HomePage from './components/pages/home_page';
 import rootReducer from './reducers/index';
@@ -21,7 +21,7 @@ class App extends Component {
         <div className="App">
           <div className="App-header">
             <img src={logo} className="App-logo" alt="logo"/>
-            <Login/>
+            <AuthUI/>
           </div>
           <div className="App-intro">
             <Router history={browserHistory}>

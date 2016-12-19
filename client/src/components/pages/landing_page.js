@@ -4,7 +4,7 @@ class LandingPage extends Component {
     render() {
         return (
             <div>
-                LandingPage {this.props.children}
+                {this.props.children}
             </div>
         );
     }
