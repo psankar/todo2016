@@ -33,7 +33,9 @@ class SignIn extends Component {
         e.preventDefault();
         console.log('handleSubmittttttt', this.state.username, this.state.password);
         if (this.state.username.length < 1) {
+            // I see mixed usage of single and double quote in this file. I prefer single quote as the convention.
             this.setState({error: "Invalid username"});
+             // Below statement is not guaranteed to print expected result as React can chose to defer state updates.
             console.log(this.state.error);
             return
         }
