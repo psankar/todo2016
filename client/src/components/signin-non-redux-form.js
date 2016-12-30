@@ -31,9 +31,11 @@ class SignIn extends Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        console.log('handleSubmittttttt', this.state.username, this.state.password.value);
+        console.log('handleSubmittttttt', this.state.username, this.state.password);
         if (this.state.username.length < 1) {
+            // I see mixed usage of single and double quote in this file. I prefer single quote as the convention.
             this.setState({error: "Invalid username"});
+             // Below statement is not guaranteed to print expected result as React can chose to defer state updates.
             console.log(this.state.error);
             return
         }
@@ -43,23 +45,26 @@ class SignIn extends Component {
             return
         }
 
+        // Reseting error
+        this.setState({error: null});
         console.log("Emit success event");
     }
 
     render() {
+        // onChange callback gets an event as arg. Need to use event.target.value
         return (
             <form onSubmit={this.handleSubmit}>
                 <input
                     placeholder="Username"
                     required
                     value={this.state.username}
-                    onChange={(username) => this.setState({username: username.value})}/>
+                    onChange={(username) => this.setState({username: username.target.value})}/>
                 <input
                     placeholder="Password"
                     type="password"
                     required
                     value={this.state.password}
-                    onChange={(password) => this.setState({password: password.value})}/>
+                    onChange={(password) => this.setState({password: password.target.value})}/>
                 <button type="submit">Sign In</button>
                 {this.renderError()}
             </form>
