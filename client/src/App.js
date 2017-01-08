@@ -1,19 +1,37 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
+import {createStore, applyMiddleware} from 'redux';
+import {Provider} from 'react-redux';
+import {Router, Route, browserHistory} from 'react-router';
+
+import AuthUI from './components/auth_ui';
+import LandingPage from './components/pages/landing_page';
+import HomePage from './components/pages/home_page';
+import rootReducer from './reducers/index';
+import requireAuth from './components/hoc/require_authentication';
+
 import logo from './logo.svg';
 import './App.css';
+
+const createStoreWithMiddleware = applyMiddleware()(createStore);
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
+      <Provider store={createStoreWithMiddleware(rootReducer)}>
+        <div className="App">
+          <div className="App-header">
+            <img src={logo} className="App-logo" alt="logo"/>
+            <AuthUI/>
+          </div>
+          <div className="App-intro">
+            <Router history={browserHistory}>
+              <Route path="/" component={LandingPage}>
+                <Route path="home" component={requireAuth(HomePage)}/>
+              </Route>
+            </Router>
+          </div>
         </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
+      </Provider>
     );
   }
 }
